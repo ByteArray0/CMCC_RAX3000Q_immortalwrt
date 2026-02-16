@@ -1,5 +1,6 @@
-ImmortalWrt For Redmi AX3000
+ImmortalWrt For CMCC RAX3000Q
 ============================
+It is compatible with the Redmi AX3000 (CR8806/8808/8809). You will need to compile it manually or check the [upstream repository](https://github.com/kmiit/Redmi_AX3000_immortalwrt).
 
 Known issue:
 ------------
@@ -32,8 +33,8 @@ sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_en
 ### Quickstart
 ```bash
 # Clone this repository
-git clone https://github.com/kmiit/Redmi_AX3000_immortalwrt
-cd Redmi_AX3000_immortalwrt
+git clone https://github.com/ByteArray0/CMCC_RAX3000Q_immortalwrt
+cd CMCC_RAX3000Q_immortalwrt
 
 # Update and install feeds
 ./scripts/feeds update -a
@@ -52,6 +53,7 @@ How To install
 
 
 ## Related Repositories
+- [Redmi_AX3000_immortalwrt](https://github.com/kmiit/Redmi_AX3000_immortalwrt)
 - [openwrt-redmi-ax3000](https://github.com/hzyitc/openwrt-redmi-ax3000)
 - [ImmortalWrt](https://github.com/immortalwrt/immortalwrt)
 - [LuCI Web Interface](https://github.com/immortalwrt/luci): Modern and modular interface to control the device via a web browser.
