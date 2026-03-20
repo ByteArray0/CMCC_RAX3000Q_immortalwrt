@@ -7,6 +7,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        device:
+          - name: Redmi-AX3000
+            config: redmi_ax3000
+          - name: CMCC-RAX3000Q
+            config: cmcc_rax3000q
     steps:
       - name: Free disk space
         run: |
@@ -32,22 +39,14 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
-      - name: Configure
+      - name: Configure ${{ matrix.device.name }}
         run: |
           cat <<EOF | sed -E 's/^  //' >.config
             CONFIG_TARGET_qualcommax=y
             CONFIG_TARGET_qualcommax_ipq50xx=y
-            CONFIG_TARGET_qualcommax_ipq50xx_DEVICE_cmcc_rax3000q=y
-
-            CONFIG_IB=y
-            # CONFIG_IB_STANDALONE is not set
-            CONFIG_SDK=y
-            CONFIG_MAKE_TOOLCHAIN=y
-
-            CONFIG_ALL_NONSHARED=y
-            CONFIG_REPRODUCIBLE_DEBUG_INFO=y
-
+            CONFIG_TARGET_qualcommax_ipq50xx_DEVICE_${{ matrix.device.config }}=y
             CONFIG_PACKAGE_luci=y
+            CONFIG_ALL_KMODS=y
           EOF
           make defconfig
 
@@ -55,29 +54,26 @@ jobs:
         run: |
           make -j16 download
 
-      - name: Build tools
+      - name: Build
         run: |
-          make -j$(nproc) tools/install
+          echo "build threads: $(nproc)";
+          make -j$(nproc) IGNORE_ERRORS=1;
 
-      - name: Build toolchain
+      - name: Archive kmod packages and rename per-device files
         run: |
-          make -j$(nproc) toolchain/install
+          cd bin/targets/qualcommax/ipq50xx/;
+          tar -zcvf openwrt-qualcommax-ipq50xx-${{ matrix.device.name }}-kmod-packages.tar.gz packages;
+          rm -rf packages;
 
-      - name: Build all
-        run: |
-          make -j$(nproc) IGNORE_ERRORS=1
+          mv config.buildinfo config-${{ matrix.device.name }}.buildinfo;
+          mv profiles.json    profiles-${{ matrix.device.name }}.json;
+          mv sha256sums sha256sums-${{ matrix.device.name }}
 
       - name: Upload bin to artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: bin-qualcommax-ipq50xx
+          name: bin-qualcommax-ipq50xx-${{ matrix.device.name }}
           path: bin/targets/qualcommax/ipq50xx/*
-
-      - name: Upload dl to artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dl
-          path: dl/*
 
   release:
     needs: [ build ]
@@ -88,23 +84,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download dl from artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dl
-          path: dl/
-
       - name: Download bin from artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bin-qualcommax-ipq50xx
+          pattern: bin-qualcommax-ipq50xx-*
+          merge-multiple: true
           path: bin/targets/qualcommax/ipq50xx/
+
+      - name: Merge sha256sums
+        run: |
+          cd bin/targets/qualcommax/ipq50xx/
+          cat sha256sums-* | sort -u -k2 > sha256sums
+          rm sha256sums-*
 
       - name: Generate release informations
         run: |
           TIME="$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" | jq -r .created_at)"
 
-          TAG="ci-${GITHUB_REF_NAME}-$(date -d "${TIME}" -u +'%Y%m%d-%H%M%S-%Z')"
+          TAG="ci-${GITHUB_REF_NAME}-qualcommax-ipq50xx-$(date -d "${TIME}" -u +'%Y%m%d-%H%M%S-%Z')"
           echo "TAG=$TAG" >>$GITHUB_ENV
 
           cat <<EOF | sed -E 's/^  //' >Release.md
@@ -114,6 +111,10 @@ jobs:
 
             Build time: \`$(date -d "${TIME}" -u +'%Y-%m-%d %H:%M:%S %Z(%:z)')\`
             Release version: ${TAG}
+
+            ## Devices
+            - Redmi AX3000
+            - CMCC RAX3000Q
 
             ## Sources
             $(cat bin/targets/qualcommax/ipq50xx/feeds.buildinfo | awk -F'[ ^]' '{printf "%s: `%s`\n", $2, $4}')
