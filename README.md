@@ -1,6 +1,6 @@
-ImmortalWrt For CMCC RAX3000Q
+ImmortalWrt 24.10 For Redmi AX3000
 ============================
-It is compatible with the Redmi AX3000 (CR8806/8808/8809). You will need to compile it manually or check the [upstream repository](https://github.com/kmiit/Redmi_AX3000_immortalwrt).
+Compatible with CMCC RAX3000Q
 
 Known issue:
 ------------
@@ -8,6 +8,10 @@ Known issue:
 - Same as [openwrt-redmi-ax3000](https://github.com/hzyitc/openwrt-redmi-ax3000)
 
 Default login address: http://192.168.1.1 or http://immortalwrt.lan, username: __root__, password: _none_.
+
+**Note:** There is currently no open-source NSS driver implementation for **ipq50xx** on newer Linux kernels. Therefore, this firmware does **not** support **NSS NAT** or **NSS Wi-Fi offload**. If you require maximum performance, this build is **not** recommended. For such use cases, please refer to [The release of kkstone's ImmortalWrt fork](https://github.com/kkstone/Actions-OpenWrt-RAX3000Q).
+
+At the moment, you must accept one of the following trade-offs: **either use an older kernel, or give up hardware acceleration.**
 
 How to build
 ============
@@ -33,8 +37,9 @@ sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_en
 ### Quickstart
 ```bash
 # Clone this repository
-git clone https://github.com/ByteArray0/CMCC_RAX3000Q_immortalwrt
-cd CMCC_RAX3000Q_immortalwrt
+git clone https://github.com/ByteArray0/mainline-immortalwrt-redmi-ax3000
+cd mainline-immortalwrt-redmi-ax3000
+git checkout immortalwrt-24.10
 
 # Update and install feeds
 ./scripts/feeds update -a
