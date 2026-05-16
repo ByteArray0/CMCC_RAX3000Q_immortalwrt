@@ -116,6 +116,7 @@ platform_do_upgrade() {
 	openwrt,one|\
 	netcore,n60|\
 	netcore,n60-pro|\
+	newland,nl-wr8103|\
 	qihoo,360t7|\
 	routerich,ax3000-ubootmod|\
 	routerich,be7200|\
@@ -321,6 +322,7 @@ platform_check_image() {
 	openwrt,one|\
 	netcore,n60|\
 	netcore,n60-pro|\
+	newland,nl-wr8103|\
 	qihoo,360t7|\
 	routerich,ax3000-ubootmod|\
 	tplink,tl-7dr7230-v1|\
