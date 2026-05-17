@@ -62,6 +62,7 @@ mediatek_setup_interfaces()
 	livinet,zr-3020|\
 	livinet,zr-3020-ubootmod|\
 	netis,nx32u|\
+	tplink,wma301-v2*|\
 	qihoo,360t7|\
 	qihoo,360t7-hanwckfuboot|\
 	routerich,ax3000|\
